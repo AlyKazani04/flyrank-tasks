@@ -25,3 +25,19 @@ curl -i -X POST http://localhost:3000/tasks -H "Content-Type: application/json" 
 printf "\n\n[Check Added Task]\n\n"
 
 curl -i http://localhost:3000/tasks
+
+printf "\n\n[Update a Task]\n\n"
+
+curl -i -X PUT http://localhost:3000/tasks/4 -H "Content-Type: application/json" -d '{"title":"Buy milk","done":true}'
+
+printf "\n\n[Check Updated Task]\n\n"
+
+curl -i http://localhost:3000/tasks
+
+printf "\n\n[Delete a Task]\n\n"
+
+curl -i -X DELETE http://localhost:3000/tasks/4 -H "Content-Type: application/json"
+
+printf "\n\n[Check Deleted Task]\n\n"
+
+curl -i http://localhost:3000/tasks/4
