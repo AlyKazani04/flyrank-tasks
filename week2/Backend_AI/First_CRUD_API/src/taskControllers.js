@@ -48,3 +48,33 @@ export const getTasksById = (req, res) => {
     });
   }
 };
+
+export const addNewTask = (req, res) => {
+  try {
+    const { title } = req.body;
+    if (!title) {
+      return res.status(400).json({
+        error: 'Missing title',
+      });
+    }
+
+    const taskAdded = db.insert(title);
+    if (!taskAdded) {
+      return res.status(500).json({
+        error: "Failed to add task",
+      });
+    }
+
+    return res.status(201).json({
+      message: 'Created',
+      taskAdded,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: error.name,
+      message: error.message,
+      cause: error.cause,
+      stack: error.stack,
+    });
+  }
+}

@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllTasks, getTasksById } from './taskControllers.js';
+import { addNewTask, getAllTasks, getTasksById } from './taskControllers.js';
 
 const app = express();
 
@@ -22,5 +22,7 @@ app.get('/health', (req, res) => {
 app.get('/tasks', getAllTasks);
 
 app.get('/tasks/:id', getTasksById);
+
+app.post('/tasks', addNewTask);
 
 export default app;
