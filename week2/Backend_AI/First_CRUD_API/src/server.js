@@ -13,7 +13,10 @@ app.get('/', (req, res) => {
   return res.status(200).json({
     name: "Task API",
     version: '1.0',
-    endpoints: ["/tasks"],
+    endpoints: [
+      "/tasks",
+      "/docs"
+    ],
   });
 });
 
