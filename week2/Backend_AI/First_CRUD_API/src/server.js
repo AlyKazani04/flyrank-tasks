@@ -1,4 +1,5 @@
 import express from 'express';
+import { getAllTasks, getTasksById } from './taskControllers.js';
 
 const app = express();
 
@@ -17,5 +18,9 @@ app.get('/health', (req, res) => {
     status: 'ok',
   });
 });
+
+app.get('/tasks', getAllTasks);
+
+app.get('/tasks/:id', getTasksById);
 
 export default app;
