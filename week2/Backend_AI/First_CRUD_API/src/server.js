@@ -1,9 +1,13 @@
 import express from 'express';
+import { serve, setup } from 'swagger-ui-express';
 import { addNewTask, deleteTask, getAllTasks, getTasksById, updateTask } from './taskControllers.js';
 
+
 const app = express();
+import doc from '../openapi.json' with {type: 'json'};
 
 app.use(express.json());
+app.use('/docs', serve, setup(doc));
 
 app.get('/', (req, res) => {
   return res.status(200).json({
