@@ -1,6 +1,6 @@
 import { db } from './db.js';
 
-const TASK_COLUMNS = 'id, title, done, created_at, updated_at';
+const TASK_COLUMNS = 'id, title, done';
 const rowToTask = (row) => {
   return {
     id: row.id,

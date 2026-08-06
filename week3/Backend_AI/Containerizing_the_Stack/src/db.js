@@ -1,16 +1,10 @@
-import Database from "better-sqlite3";
+import { Pool } from "pg";
 
-const db = new Database('./tasks.db');
+const connectionString = process.env.DATABASE_URL;
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS tasks (
-    id INTEGER PRIMARY KEY,
-    title TEXT NOT NULL,
-    done INTEGER NOT NULL DEFAULT 0,
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-`);
+const db = new Pool({
+  connectionString
+});
 
 const SEED_TASKS = [
   { id: 1, title: 'Init Task', done: false },
@@ -18,29 +12,59 @@ const SEED_TASKS = [
   { id: 3, title: 'Implement DB Methods', done: false },
 ];
 
-const insertSeedTask = db.prepare('INSERT INTO tasks (id, title, done) VALUES (?, ?, ?);');
+const insertSeedTask = 'INSERT INTO tasks (title, done) VALUES ($1, $2);';
 
-function seedTasks(tasks) {
+async function seedTasks(tasks) {
   for (const task of tasks) {
-    insertSeedTask.run(task.id, task.title, task.done ? 1 : 0);
+    await db.query(insertSeedTask, [task.title, task.done]);
   }
 }
 
-// seed only when table is empty or newly created
-const taskCount = db.prepare('SELECT COUNT(*) AS count FROM tasks;')
+async function initDB() {
+  try {
+    await db.query(`
+        CREATE TABLE IF NOT EXISTS tasks (
+          id SERIAL PRIMARY KEY,
+          title TEXT NOT NULL,
+          done BOOLEAN NOT NULL DEFAULT FALSE
+        );
+    `);
+    console.log('DB Connected Successfully');
 
-if (taskCount.get().count === 0) {
-  db.transaction(seedTasks)(SEED_TASKS);
+    // seed only when table is empty or newly created
+    const taskCountResult = await db.query('SELECT COUNT(*) AS count FROM tasks;');
+    const count = parseInt(taskCountResult.rows[0].count, 10);
+
+    if (count === 0) {
+      await seedTasks(SEED_TASKS);
+      console.log('DB seeded with initial tasks');
+    }
+  } catch (error) {
+    console.error('DB Initialization Error\n', error.stack);
+  }
 }
 
-export function resetDB() {
-  const wipe = db.prepare('DELETE FROM tasks;');
-  const reset = db.transaction((tasks) => {
-    wipe.run();
-    seedTasks(tasks);
-  });
+await initDB();
 
-  reset(SEED_TASKS);
+export async function resetDB() {
+  const wipe = 'DELETE FROM tasks;';
+
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(wipe);
+
+    for (const task of SEED_TASKS) {
+      await client.query(insertSeedTask, [task.title, task.done]);
+    }
+
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 export { db };
