@@ -14,11 +14,19 @@ const rowToTask = (row) => {
 export function getAll() {
   const rows = db.prepare(`SELECT ${TASK_COLUMNS} FROM tasks;`).all();
 
-  return rows;
+  return rows.map(rowToTask);
 }
 
 export function getById(id) {
-  const rows = db.prepare(`SELECT ${TASK_COLUMNS} FROM tasks WHERE id = ?;`).get(id);
+  const rows = db.prepare(`SELECT ${TASK_COLUMNS} FROM tasks WHERE id = ?;`).all(id);
 
-  return rows;
+  return rows.map(rowToTask);
+}
+
+export function insertTask(title) {
+  const insert = db.prepare(`INSERT INTO tasks (title) VALUES(?) RETURNING *`);
+
+  const row = insert.all(title);
+
+  return row.map(rowToTask);
 }

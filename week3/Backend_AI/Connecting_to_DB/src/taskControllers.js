@@ -1,11 +1,11 @@
-import { getAll, getById } from "./taskQueries.js";
+import { getAll, getById, insertTask } from "./taskQueries.js";
 
 export const getAllTasks = (req, res) => {
   try {
 
     const tasks = getAll();
 
-    if (tasks === undefined) {
+    if (!tasks) {
       return res.status(404).json({
         error: 'No tasks found',
       });
@@ -38,7 +38,7 @@ export const getTasksById = (req, res) => {
 
     const task = getById(parsedId);
 
-    if (task === undefined) {
+    if (!task) {
       return res.status(404).json({
         error: `Task ${id} not found`,
       });
@@ -60,14 +60,14 @@ export const getTasksById = (req, res) => {
 
 export const addNewTask = (req, res) => {
   const { title } = req.body;
-  if (!title) {
+  if (!title || title.trim() === '') {
     return res.status(400).json({
       error: 'Missing title',
     });
   }
 
   try {
-    const taskAdded = db.insert(title);
+    const taskAdded = insertTask(title);
     if (!taskAdded) {
       return res.status(500).json({
         error: "Failed to add task",
