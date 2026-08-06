@@ -50,7 +50,7 @@
     "/tasks": {
       "get": {
         "summary": "Get All Tasks",
-        "description": "Retrieves a list of all tasks.",
+        "description": "Retrieves a list of all tasks from the SQLite database.",
         "responses": {
           "200": {
             "description": "Tasks found successfully",
@@ -86,7 +86,7 @@
       },
       "post": {
         "summary": "Add New Task",
-        "description": "Creates a new task with the provided title.",
+        "description": "Creates a new task in the database with the provided title.",
         "requestBody": {
           "required": true,
           "content": {
@@ -109,7 +109,7 @@
             }
           },
           "400": {
-            "description": "Missing title in request body",
+            "description": "Missing or empty title in request body",
             "content": {
               "application/json": {
                 "schema": {
@@ -153,6 +153,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TaskSingleResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -215,7 +225,7 @@
             }
           },
           "400": {
-            "description": "Missing parameters or invalid ID type",
+            "description": "Missing parameters, empty title, or invalid ID type",
             "content": {
               "application/json": {
                 "schema": {
@@ -312,14 +322,24 @@
             "example": "Init Task"
           },
           "done": {
-            "type": "boolean",
-            "example": false
+            "type": "integer",
+            "example": 0
+          },
+          "created_at": {
+            "type": "string",
+            "example": "2026-08-06 14:20:37"
+          },
+          "updated_at": {
+            "type": "string",
+            "example": "2026-08-06 14:20:37"
           }
         },
         "required": [
           "id",
           "title",
-          "done"
+          "done",
+          "created_at",
+          "updated_at"
         ]
       },
       "ApiInfo": {
@@ -339,7 +359,8 @@
               "type": "string"
             },
             "example": [
-              "/tasks"
+              "/tasks",
+              "/docs"
             ]
           }
         }
@@ -368,7 +389,11 @@
         "type": "object",
         "properties": {
           "task": {
-            "$ref": "#/components/schemas/Task"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Task"
+            },
+            "description": "Array containing the matched task object"
           }
         }
       },
@@ -392,7 +417,10 @@
             "example": "Created"
           },
           "taskAdded": {
-            "$ref": "#/components/schemas/Task"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Task"
+            }
           }
         }
       },
@@ -421,7 +449,10 @@
             "example": "Updated Successfully"
           },
           "updatedTask": {
-            "$ref": "#/components/schemas/Task"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Task"
+            }
           }
         }
       },

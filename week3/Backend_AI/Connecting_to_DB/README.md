@@ -1,6 +1,20 @@
 ## Task API (CRUD Application)
 
-A lightweight Node.js and Express RESTful API utilizing a mock database, complete with built-in OpenAPI specifications and Swagger UI documentation.
+A lightweight Node.js and Express RESTful API backed by SQLite (better-sqlite3), complete with built-in OpenAPI specifications and Swagger UI documentation.
+
+### Why SQLite?
+
+SQLite was chosen for this project because it provides a self-contained, serverless, and zero-configuration SQL database engine. It allows for fast local development, eliminates the need for managing external database services, and integrates seamlessly with Node.js using `better-sqlite3` for synchronous, high-performance query execution.
+
+---
+
+### Database Storage
+
+The SQLite database file is stored locally in the root directory of the project:
+
+```
+./tasks.db
+```
 
 ---
 
@@ -29,29 +43,10 @@ npm install && npm run dev
 
 ---
 
-### Example cURL Output
+### Database Viewer
 
-Below is an example output for a `GET` request to the root endpoint (`/`):
-
-```http
-HTTP/1.1 200 OK
-X-Powered-By: Express
-Content-Type: application/json; charset=utf-8
-Content-Length: 64
-ETag: W/"35-5L9j0r9/3WqA3a4lCgS91J1B48E"
-Date: Mon, 03 Aug 2026 13:24:08 GMT
-Connection: keep-back
-
-{
-  "name": "Task API",
-  "version": "1.0",
-  "endpoints": [
-    "/tasks",
-    "/docs"
-  ]
-}
-
-```
+![Database Viewer](./demo/db_viewer.png)
+![Example Query](./demo/example_query.png)
 
 ---
 
