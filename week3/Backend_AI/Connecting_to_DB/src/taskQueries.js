@@ -24,9 +24,25 @@ export function getById(id) {
 }
 
 export function insertTask(title) {
-  const insert = db.prepare(`INSERT INTO tasks (title) VALUES(?) RETURNING *`);
+  const insert = db.prepare(`INSERT INTO tasks (title) VALUES(?) RETURNING *;`);
 
   const row = insert.all(title);
 
   return row.map(rowToTask);
+}
+
+export function modifyTask(title, done, id) {
+  const update = db.prepare('UPDATE tasks SET title = ?, done = ? WHERE id = ? RETURNING *;');
+
+  const row = update.all(title, done, id);
+
+  return row.map(rowToTask);
+}
+
+export function removeTask(id) {
+  const deleted = db.prepare('DELETE FROM tasks WHERE id = ?');
+
+  const row = deleted.run(id);
+
+  return row.changes;
 }

@@ -1,11 +1,11 @@
-import { getAll, getById, insertTask } from "./taskQueries.js";
+import { getAll, getById, insertTask, modifyTask, removeTask } from "./taskQueries.js";
 
 export const getAllTasks = (req, res) => {
   try {
 
     const tasks = getAll();
 
-    if (!tasks) {
+    if (tasks.length === 0) {
       return res.status(404).json({
         error: 'No tasks found',
       });
@@ -27,18 +27,18 @@ export const getAllTasks = (req, res) => {
 
 export const getTasksById = (req, res) => {
   try {
-    const id = req.params.id;
+    let id = req.params.id;
 
-    const parsedId = parseInt(id, 10);
-    if (!parsedId || isNaN(parsedId)) {
+    id = parseInt(id, 10);
+    if (!id || isNaN(id)) {
       return res.status(400).json({
         error: 'Invalid ID provided',
       });
     }
 
-    const task = getById(parsedId);
+    const task = getById(id);
 
-    if (!task) {
+    if (task.length === 0) {
       return res.status(404).json({
         error: `Task ${id} not found`,
       });
@@ -68,7 +68,7 @@ export const addNewTask = (req, res) => {
 
   try {
     const taskAdded = insertTask(title);
-    if (!taskAdded) {
+    if (taskAdded.length) {
       return res.status(500).json({
         error: "Failed to add task",
       });
@@ -92,22 +92,22 @@ export const updateTask = (req, res) => {
   let { id } = req.params;
   const { title, done } = req.body;
 
-  if (!title || !id || !done) {
+  if (!title || title.trim() === '' || !id || !done) {
     return res.status(400).json({
       error: 'Missing title or id or done',
     });
   }
 
-  try {
-    id = parseInt(id, 10);
-    if (isNaN(id)) {
-      return res.status(400).json({
-        error: 'ID must be a number',
-      });
-    }
+  id = parseInt(id, 10);
+  if (isNaN(id)) {
+    return res.status(400).json({
+      error: 'ID must be a number',
+    });
+  }
 
-    const updatedTask = db.update({ id, title, done });
-    if (updatedTask === null) {
+  try {
+    const updatedTask = modifyTask(title, done ? 1 : 0, id);
+    if (updatedTask.length === 0) {
       return res.status(404).json({
         error: 'Task not found',
       });
@@ -130,16 +130,16 @@ export const updateTask = (req, res) => {
 export const deleteTask = (req, res) => {
   let { id } = req.params;
 
-  try {
-    id = parseInt(id, 10);
-    if (isNaN(id)) {
-      return res.status(400).json({
-        error: 'ID must be a number',
-      });
-    }
+  id = parseInt(id, 10);
+  if (isNaN(id)) {
+    return res.status(400).json({
+      error: 'ID must be a number',
+    });
+  }
 
-    const deletedTask = db.delete(id);
-    if (!deletedTask) {
+  try {
+    const deletedTaskCount = removeTask(id);
+    if (deletedTaskCount === 0) {
       return res.status(404).json({
         error: 'Task not found',
       });
