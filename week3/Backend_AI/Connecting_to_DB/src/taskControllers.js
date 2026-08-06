@@ -1,10 +1,11 @@
-import { db } from "./db.js";
+import { getAll, getById } from "./taskQueries.js";
 
 export const getAllTasks = (req, res) => {
   try {
-    const tasks = db.select();
 
-    if (tasks === null) {
+    const tasks = getAll();
+
+    if (tasks === undefined) {
       return res.status(404).json({
         error: 'No tasks found',
       });
@@ -27,9 +28,17 @@ export const getAllTasks = (req, res) => {
 export const getTasksById = (req, res) => {
   try {
     const id = req.params.id;
-    const task = db.select(id);
 
-    if (task === null) {
+    const parsedId = parseInt(id, 10);
+    if (!parsedId || isNaN(parsedId)) {
+      return res.status(400).json({
+        error: 'Invalid ID provided',
+      });
+    }
+
+    const task = getById(parsedId);
+
+    if (task === undefined) {
       return res.status(404).json({
         error: `Task ${id} not found`,
       });
