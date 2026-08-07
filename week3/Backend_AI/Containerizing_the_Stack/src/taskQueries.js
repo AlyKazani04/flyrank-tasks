@@ -23,26 +23,20 @@ export async function getById(id) {
   return selectResult.rows.map(rowToTask);
 }
 
-export function insertTask(title) {
-  const insert = db.prepare(`INSERT INTO tasks (title) VALUES(?) RETURNING *;`);
+export async function insertTask(title) {
+  const insertResult = await db.query(`INSERT INTO tasks (title) VALUES($1) RETURNING *;`, [title]);
 
-  const row = insert.all(title);
-
-  return row.map(rowToTask);
+  return insertResult.rows.map(rowToTask);
 }
 
-export function modifyTask(title, done, id) {
-  const update = db.prepare('UPDATE tasks SET title = ?, done = ? WHERE id = ? RETURNING *;');
+export async function modifyTask(title, done, id) {
+  const updateResult = await db.query('UPDATE tasks SET title = $1, done = $2 WHERE id = $3 RETURNING *;', [title, done, id]);
 
-  const row = update.all(title, done, id);
-
-  return row.map(rowToTask);
+  return updateResult.rows.map(rowToTask);
 }
 
-export function removeTask(id) {
-  const deleted = db.prepare('DELETE FROM tasks WHERE id = ?');
+export async function removeTask(id) {
+  const deleteResult = db.query('DELETE FROM tasks WHERE id = $1 RETURNING *', [id]);
 
-  const row = deleted.run(id);
-
-  return row.changes;
+  return (await deleteResult).rowCount;
 }

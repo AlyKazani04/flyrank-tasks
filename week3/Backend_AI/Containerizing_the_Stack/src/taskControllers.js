@@ -58,7 +58,7 @@ export const getTasksById = async (req, res) => {
   }
 };
 
-export const addNewTask = (req, res) => {
+export const addNewTask = async (req, res) => {
   const { title } = req.body;
   if (!title || title.trim() === '') {
     return res.status(400).json({
@@ -67,8 +67,8 @@ export const addNewTask = (req, res) => {
   }
 
   try {
-    const taskAdded = insertTask(title);
-    if (taskAdded.length) {
+    const taskAdded = await insertTask(title);
+    if (taskAdded.length === 0) {
       return res.status(500).json({
         error: "Failed to add task",
       });
@@ -88,11 +88,11 @@ export const addNewTask = (req, res) => {
   }
 }
 
-export const updateTask = (req, res) => {
+export const updateTask = async (req, res) => {
   let { id } = req.params;
   const { title, done } = req.body;
 
-  if (!title || title.trim() === '' || !id || !done) {
+  if (!title || title.trim() === '' || !id || done === null || done === undefined) {
     return res.status(400).json({
       error: 'Missing title or id or done',
     });
@@ -106,7 +106,7 @@ export const updateTask = (req, res) => {
   }
 
   try {
-    const updatedTask = modifyTask(title, done ? 1 : 0, id);
+    const updatedTask = await modifyTask(title, done, id);
     if (updatedTask.length === 0) {
       return res.status(404).json({
         error: 'Task not found',
@@ -127,7 +127,7 @@ export const updateTask = (req, res) => {
   }
 }
 
-export const deleteTask = (req, res) => {
+export const deleteTask = async (req, res) => {
   let { id } = req.params;
 
   id = parseInt(id, 10);
@@ -138,7 +138,7 @@ export const deleteTask = (req, res) => {
   }
 
   try {
-    const deletedTaskCount = removeTask(id);
+    const deletedTaskCount = await removeTask(id);
     if (deletedTaskCount === 0) {
       return res.status(404).json({
         error: 'Task not found',
