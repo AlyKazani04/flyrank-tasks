@@ -11,16 +11,16 @@ const rowToTask = (row) => {
   };
 };
 
-export function getAll() {
-  const rows = db.prepare(`SELECT ${TASK_COLUMNS} FROM tasks;`).all();
+export async function getAll() {
+  const selectResult = await db.query(`SELECT ${TASK_COLUMNS} FROM tasks;`);
 
-  return rows.map(rowToTask);
+  return selectResult.rows.map(rowToTask);
 }
 
-export function getById(id) {
-  const rows = db.prepare(`SELECT ${TASK_COLUMNS} FROM tasks WHERE id = ?;`).all(id);
+export async function getById(id) {
+  const selectResult = await db.query(`SELECT ${TASK_COLUMNS} FROM tasks WHERE id = $1;`, [id]);
 
-  return rows.map(rowToTask);
+  return selectResult.rows.map(rowToTask);
 }
 
 export function insertTask(title) {

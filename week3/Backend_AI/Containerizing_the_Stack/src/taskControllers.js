@@ -1,9 +1,9 @@
 import { getAll, getById, insertTask, modifyTask, removeTask } from "./taskQueries.js";
 
-export const getAllTasks = (req, res) => {
+export const getAllTasks = async (req, res) => {
   try {
 
-    const tasks = getAll();
+    const tasks = await getAll();
 
     if (tasks.length === 0) {
       return res.status(404).json({
@@ -25,7 +25,7 @@ export const getAllTasks = (req, res) => {
   }
 };
 
-export const getTasksById = (req, res) => {
+export const getTasksById = async (req, res) => {
   try {
     let id = req.params.id;
 
@@ -36,7 +36,7 @@ export const getTasksById = (req, res) => {
       });
     }
 
-    const task = getById(id);
+    const task = await getById(id);
 
     if (task.length === 0) {
       return res.status(404).json({
