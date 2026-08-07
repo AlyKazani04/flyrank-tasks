@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { Pool } from "pg";
 
 const connectionString = process.env.DATABASE_URL;
@@ -20,27 +21,35 @@ async function seedTasks(tasks) {
   }
 }
 
-async function initDB() {
-  try {
-    await db.query(`
+async function initDB(retries = 5, delay = 2000) {
+  while (retries > 0) {
+    try {
+      await db.query(`
         CREATE TABLE IF NOT EXISTS tasks (
           id SERIAL PRIMARY KEY,
           title TEXT NOT NULL,
           done BOOLEAN NOT NULL DEFAULT FALSE
         );
-    `);
-    console.log('DB Connected Successfully');
+      `);
+      console.log('DB Connected Successfully');
 
-    // seed only when table is empty or newly created
-    const taskCountResult = await db.query('SELECT COUNT(*) AS count FROM tasks;');
-    const count = parseInt(taskCountResult.rows[0].count, 10);
+      const taskCountResult = await db.query('SELECT COUNT(*) AS count FROM tasks;');
+      const count = parseInt(taskCountResult.rows[0].count, 10);
 
-    if (count === 0) {
-      await seedTasks(SEED_TASKS);
-      console.log('DB seeded with initial tasks');
+      if (count === 0) {
+        await seedTasks(SEED_TASKS);
+        console.log('DB seeded with initial tasks');
+      }
+
+      return; // Connection and setup succeeded
+    } catch (error) {
+      retries -= 1;
+      console.error(`DB Initialization failed. Retries left: ${retries}`);
+      if (retries === 0) throw error;
+
+      // Wait before retrying
+      await new Promise((res) => setTimeout(res, delay));
     }
-  } catch (error) {
-    console.error('DB Initialization Error\n', error.stack);
   }
 }
 
